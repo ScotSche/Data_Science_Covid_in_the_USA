@@ -1,0 +1,75 @@
+---
+title: "Analysis of deaths related to Covid-19 in the United States of America"
+author: "Sebastian Kaltenbach"
+date: "09/26/2021"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+## Introduction
+
+Countries around the world are responding to an outbreak of respiratory illness caused by a novel coronavirus, COVID-19.
+The outbreak first started in Wuhan, China, but cases have been identified in a growing number of other locations internationally, including the United States.
+In this report we explore how a selection of states in the USA were influenced by Covid 19 with a special focus on the deaths related with the Virus.
+
+The dataframe was selected by the Centers for Disease Control and Prevention (CDC) and is available with the following link: https://data.cdc.gov/Case-Surveillance/United-States-COVID-19-Cases-and-Deaths-by-State-o/9mfq-cb36/data.
+Date of extraction: 09/26/2021
+
+For our analysis, in addition to the coronavirus package, we will use the following packages for data wrangling and visualisation.
+
+-   **tidyverse** for data wrangling and visualization
+
+```{r}
+library(tidyverse)
+```
+
+## Data prep
+
+The data frame of the CDC can be accessed by loading the provided .csv file, containing a list of all states in the USA. Each row in the data frame represents a state.
+For this report, we will focus on the deaths (confirmed).
+
+We will start by making our selection for the states we want to explore. Including: New York, Florida, Connecticut, Massachusetts, New Jersey, Texas, California, Washington, Illinois, Idaho.
+```{r}
+states <- c("NY", "NJ", "FL", "CA", "ID", "IL", "TX", "WA", "CT", "MA")
+```
+
+In the following code chunk we filter the data frame for the states we specified above.
+
+```{r}
+covid_data_by_state <- read.csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+
+names(covid_data_by_state)[1] <- "date"
+
+covid_data_by_state <- covid_data_by_state %>%
+  filter(state %in% states) %>%
+  filter(new_death > 0) %>%
+  group_by(state, date) %>%
+  arrange(date) %>%
+  ungroup()
+
+#covid_data_by_state <- covid_data_by_state[seq(1, nrow(covid_data_by_state),5), ]
+```
+
+## Visualisation
+
+The following visualization shows the number of deaths per day in each state.
+
+```{r visualization, warning=FALSE}
+ggplot(data = covid_data_by_state, 
+       mapping = aes( x = date, 
+                      y = new_death, 
+                      color = state, group = 1), stat = "fuction") +
+  geom_line() +
+  scale_color_viridis_d() +
+  theme_minimal() +
+  labs(x = "Date",
+       y = "Number of confirmed deaths",
+       title = "Deaths from COVID-19 per day, selected states in the US",
+       subtitle = "Date as of Sun, Sep.26 2021",
+       caption = "Source: https://data.cdc.gov"
+       )
+```
+## Further research
+
+Further research must be done regarding the visualization of the available data, as well as the further analysis of the data itself. This can show further areas of research like peaks during a certain time period. In addition, this analysis can separate the country in regions (not only state-wise), with high/low death-rates, which could show problems in e.g., health care. 
