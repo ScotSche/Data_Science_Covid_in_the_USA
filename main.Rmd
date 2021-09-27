@@ -22,6 +22,7 @@ For our analysis, in addition to the coronavirus package, we will use the follow
 
 ```{r}
 library(tidyverse)
+library(RSocrata)
 ```
 
 ## Data prep
@@ -37,15 +38,21 @@ states <- c("NY", "NJ", "FL", "CA", "ID", "IL", "TX", "WA", "CT", "MA")
 In the following code chunk we filter the data frame for the states we specified above.
 
 ```{r}
-covid_data_by_state <- read.csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
+covid_data_by_state <- read.socrata(
+  "https://data.cdc.gov/resource/9mfq-cb36.json",
+  app_token = "v8SD9hWJlfUNOqWOx9ekRKgCa",
+  email     = "kaltens@clarkson.edu",
+  password  = ""
+)
 
 names(covid_data_by_state)[1] <- "date"
 
 covid_data_by_state <- covid_data_by_state %>%
   filter(state %in% states) %>%
+ # mutate(date = as.Date(date, "%m/%d/%y")) %>%
   filter(new_death > 0) %>%
   group_by(state, date) %>%
-  arrange(date) %>%
+  arrange(state, date) %>%
   ungroup()
 
 #covid_data_by_state <- covid_data_by_state[seq(1, nrow(covid_data_by_state),5), ]
