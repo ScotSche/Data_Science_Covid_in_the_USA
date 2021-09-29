@@ -23,6 +23,7 @@ For our analysis, in addition to the coronavirus package, we will use the follow
 ```{r}
 library(tidyverse)
 library(RSocrata)
+library(covid19nytimes)
 ```
 
 ## Data prep
@@ -38,18 +39,20 @@ states <- c("NY", "NJ", "FL", "CA", "ID", "IL", "TX", "WA", "CT", "MA")
 In the following code chunk we filter the data frame for the states we specified above.
 
 ```{r}
-covid_data_by_state <- read.socrata(
-  "https://data.cdc.gov/resource/9mfq-cb36.json",
-  app_token = "v8SD9hWJlfUNOqWOx9ekRKgCa",
-  email     = "kaltens@clarkson.edu",
-  password  = ""
-)
+# covid_data_by_state <- read.socrata(
+#   "https://data.cdc.gov/resource/9mfq-cb36.json",
+#   app_token = "v8SD9hWJlfUNOqWOx9ekRKgCa",
+#   email     = "kaltens@clarkson.edu",
+#   password  = ""
+# )
+
+covid_data_by_state <- read.csv("United_States_COVID-19_Cases_and_Deaths_by_State_over_Time.csv")
 
 names(covid_data_by_state)[1] <- "date"
 
 covid_data_by_state <- covid_data_by_state %>%
   filter(state %in% states) %>%
- # mutate(date = as.Date(date, "%m/%d/%y")) %>%
+  mutate(date = as.Date(date, "%m/%d/%y")) %>%
   filter(new_death > 0) %>%
   group_by(state, date) %>%
   arrange(state, date) %>%
@@ -80,3 +83,19 @@ ggplot(data = covid_data_by_state,
 ## Further research
 
 Further research must be done regarding the visualization of the available data, as well as the further analysis of the data itself. This can show further areas of research like peaks during a certain time period. In addition, this analysis can separate the country in regions (not only state-wise), with high/low death-rates, which could show problems in e.g., health care. 
+```{r}
+locations <- c("New York", "Florida", "Connecticut", "Massachusetts", "New Jersey", "Texas", "California", "Washington", "Illinois", "Idaho")
+```
+
+```{r}
+covid19nytimes_states <- refresh_covid19nytimes_states() %>%
+  filter(location %in% locations,
+         data_type == "deaths_total") %>%
+  arrange(date) %>%
+  
+```
+
+
+
+
+
